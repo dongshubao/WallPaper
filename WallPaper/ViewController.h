@@ -10,6 +10,19 @@
 
 @interface ViewController : NSViewController
 
+@property (weak) IBOutlet NSDatePicker *picDate;
+
+@property (weak) IBOutlet NSTextField *picPath;
+
+@property (weak) IBOutlet NSProgressIndicator *dumpProgress;
+
+@property (weak) IBOutlet NSTextField *dumpNum;
+
+@property (weak) IBOutlet NSTableView *picTable;
+
+@property (nonatomic, strong) NSTimer *refreshTimer;
+
+@property NSMutableArray *array;
 
 @end
 
