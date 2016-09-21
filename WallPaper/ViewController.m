@@ -42,6 +42,45 @@
     // Update the view, if already loaded.
 }
 
+-(IBAction)changeWallPaper:(id)sender {
+    
+    NSArray *files = [[[NSFileManager alloc] init] contentsOfDirectoryAtPath:self.picPath.stringValue error:nil];
+    //NSLog(@"%@", files);
+
+    NSMutableArray *jpgList = [NSMutableArray new];
+    
+    for(NSString *file in files){
+        if([file hasSuffix:@".jpg"]){
+            [jpgList addObject:file];
+        }
+    }
+    //NSLog(@"%d", [@"haha" hasSuffix:@".jpg"]);
+    if([jpgList count]){
+        NSString *path = [[NSString alloc] initWithFormat:@"%@/%@",self.picPath.stringValue,[jpgList objectAtIndex:arc4random() % [jpgList count]]];
+        NSTask *task = [[NSTask alloc] init];
+        task.launchPath = @"/usr/bin/osascript";
+        NSString *command = [[NSString alloc] initWithFormat:@"tell application \"Finder\" to set desktop picture to POSIX file \"%@\"",path];
+        NSLog(@"%@", command);
+        NSArray *arguments = [NSArray arrayWithObjects: @"-e", command, nil];
+        [task setArguments: arguments];
+        // 新建输出管道作为Task的输出
+        NSPipe *pipe = [NSPipe pipe];
+        [task setStandardOutput: pipe];
+         
+         // 开始task
+        NSFileHandle *file = [pipe fileHandleForReading];
+        [task launch];
+         
+        // 获取运行结果
+        NSData *data = [file readDataToEndOfFile];
+        NSLog(@"%@", [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding]);
+    }
+    else{
+        [self alert:@"通知" withInformative:@"当前文件夹无图片，请先下载图片到当前文件夹！"];
+    }
+}
+
+
 
 - (IBAction)browePath:(id)sender {
     
@@ -204,8 +243,12 @@ didFinishDownloadingToURL:(NSURL *)location
     NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (error) {
             NSLog(@"Httperror: %@%ld", error.localizedDescription, error.code);
-            [self alert:[[NSString alloc] initWithFormat:@"%ld", error.code] withInformative:error.localizedDescription];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self alert:[[NSString alloc] initWithFormat:@"%ld", error.code] withInformative:error.localizedDescription];
+            });
         } else {
+            NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
+            NSLog(@"responseCode:%ld", responseCode);
             result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             NSString* jsonString = result;
             //将字符串写到缓冲区。
@@ -240,7 +283,9 @@ didFinishDownloadingToURL:(NSURL *)location
                 });
             }
             else{
-                [self alert:@"无内容" withInformative:@"请检查日期！"];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self alert:@"无内容" withInformative:@"请检查网络或者日期！"];
+                });
             }
         }
     }];
