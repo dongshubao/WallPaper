@@ -223,7 +223,10 @@ didFinishDownloadingToURL:(NSURL *)location
                     [self downLoadPic:[[picList[i] objectForKey:@"image"] objectForKey:@"original"] withIndex:[[NSString alloc] initWithFormat:@"%d", i]];
                 }
                 [picTable reloadData];
-                self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(refresh)  userInfo:nil repeats:YES];
+                //调用主线程刷星进度条
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(refresh)  userInfo:nil repeats:YES];
+                });
             }
             else{
                 [self alert:@"无内容" withInformative:@"请检查日期！"];
