@@ -60,7 +60,7 @@
         NSTask *task = [[NSTask alloc] init];
         task.launchPath = @"/usr/bin/osascript";
         NSString *command = [[NSString alloc] initWithFormat:@"tell application \"Finder\" to set desktop picture to POSIX file \"%@\"",path];
-        NSLog(@"%@", command);
+        //NSLog(@"%@", command);
         NSArray *arguments = [NSArray arrayWithObjects: @"-e", command, nil];
         [task setArguments: arguments];
         // 新建输出管道作为Task的输出
@@ -79,7 +79,6 @@
         [self alert:@"通知" withInformative:@"当前文件夹无图片，请先下载图片到当前文件夹！"];
     }
 }
-
 
 
 - (IBAction)browePath:(id)sender {
@@ -247,8 +246,8 @@ didFinishDownloadingToURL:(NSURL *)location
                 [self alert:[[NSString alloc] initWithFormat:@"%ld", error.code] withInformative:error.localizedDescription];
             });
         } else {
-            NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
-            NSLog(@"responseCode:%ld", responseCode);
+            //NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
+            //NSLog(@"responseCode:%ld", responseCode);
             result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             NSString* jsonString = result;
             //将字符串写到缓冲区。
