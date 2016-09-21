@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1605F98B1D92927000E99A74 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 1605F98A1D92927000E99A74 /* README.md */; };
 		161C36A41D8BE3C300A05FAC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 161C36A31D8BE3C300A05FAC /* AppDelegate.m */; };
 		161C36A71D8BE3C300A05FAC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 161C36A61D8BE3C300A05FAC /* main.m */; };
 		161C36AA1D8BE3C300A05FAC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 161C36A91D8BE3C300A05FAC /* ViewController.m */; };
@@ -36,7 +35,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1605F98A1D92927000E99A74 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		161C369F1D8BE3C300A05FAC /* WallPaper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WallPaper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		161C36A21D8BE3C300A05FAC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		161C36A31D8BE3C300A05FAC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -84,7 +82,6 @@
 		161C36961D8BE3C300A05FAC = {
 			isa = PBXGroup;
 			children = (
-				1605F98A1D92927000E99A74 /* README.md */,
 				161C36A11D8BE3C300A05FAC /* WallPaper */,
 				161C36B81D8BE3C300A05FAC /* WallPaperTests */,
 				161C36C31D8BE3C300A05FAC /* WallPaperUITests */,
@@ -279,7 +276,6 @@
 			files = (
 				161C36AA1D8BE3C300A05FAC /* ViewController.m in Sources */,
 				161C36A71D8BE3C300A05FAC /* main.m in Sources */,
-				1605F98B1D92927000E99A74 /* README.md in Sources */,
 				16BBC1D31D91A5A2006E320D /* picData.m in Sources */,
 				161C36A41D8BE3C300A05FAC /* AppDelegate.m in Sources */,
 			);

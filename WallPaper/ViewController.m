@@ -48,8 +48,11 @@
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
 
     [openDlg setCanChooseDirectories:YES];
+    [openDlg setCanChooseFiles:NO];
+    [openDlg setCanCreateDirectories:YES];
+    [openDlg setTitle:@"请选择保存位置"];
 
-    if ( [openDlg runModalForDirectory:nil file:nil] == NSOKButton )
+    if ( [openDlg runModal] == NSModalResponseOK )
     {
         NSArray* files = [openDlg filenames];
         NSString* fileName = [files objectAtIndex:0];
@@ -126,7 +129,7 @@
 
 -(void)downLoadPic:(NSString *) urlStr withIndex:(NSString *) downLoadTaskDescription
 {
-    urlStr = [urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    //urlStr = [urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSURL * url = [NSURL URLWithString:urlStr];
     
     //专门用来管理session的类(可以配置全局访问网络的参数), 是一个单例的类
