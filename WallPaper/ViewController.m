@@ -148,7 +148,7 @@ didFinishDownloadingToURL:(NSURL *)location
     
     // AtPath : 剪切前的文件路径     // ToPath : 剪切后的文件路径
     [[NSFileManager defaultManager] moveItemAtPath :location.path toPath:file error : nil];
-    NSLog(@"Done");
+    //NSLog(@"Done");
 }
 
 
