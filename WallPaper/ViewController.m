@@ -105,8 +105,6 @@
     NSString *httpArg = [@"a=everyday&spdy=1&device=105&uuid=4276e63c48ae0961b09df4f2e0d04229&mode=0&retina=1&client_id=1008&device_id=67089839&model_id=105&size_id=0&channel_id=79979&screen_width=2880&screen_height=1800&bizhi_width=2880&bizhi_height=1800&version_code=27&language=zh-Hans&jailbreak=0&mac=&date=" stringByAppendingString:na];
     
     [self request:httpUrl withHttpArg:httpArg];
-    
-    self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(refresh)  userInfo:nil repeats:YES];
 }
 
 
@@ -210,19 +208,26 @@ didFinishDownloadingToURL:(NSURL *)location
             
             NSArray *picList = [dic objectForKey:@"data"];
             
-            array = [NSMutableArray new];
+            if ([picList count]){
             
-            for(int i = 0; i< [picList count]; i++){
+                array = [NSMutableArray new];
+            
+                for(int i = 0; i< [picList count]; i++){
                 
-                NSString *url = [[picList[i] objectForKey:@"image"] objectForKey:@"original"];
+                    NSString *url = [[picList[i] objectForKey:@"image"] objectForKey:@"original"];
                 
-                picData *data = [picData new];
-                [data setUrl:url];
-                [data setProgress:[[NSString alloc] initWithFormat:@"%d%%", 0]];
-                [array addObject:data];
-                [self downLoadPic:[[picList[i] objectForKey:@"image"] objectForKey:@"original"] withIndex:[[NSString alloc] initWithFormat:@"%d", i]];
+                    picData *data = [picData new];
+                    [data setUrl:url];
+                    [data setProgress:[[NSString alloc] initWithFormat:@"%d%%", 0]];
+                    [array addObject:data];
+                    [self downLoadPic:[[picList[i] objectForKey:@"image"] objectForKey:@"original"] withIndex:[[NSString alloc] initWithFormat:@"%d", i]];
+                }
+                [picTable reloadData];
+                self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(refresh)  userInfo:nil repeats:YES];
             }
-            [picTable reloadData];
+            else{
+                [self alert:@"无内容" withInformative:@"请检查日期！"];
+            }
         }
     }];
     [task resume];
