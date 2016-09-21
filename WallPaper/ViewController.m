@@ -24,6 +24,8 @@
     [self.picTable setDelegate:self];
     [self.picTable setDataSource:self];
     
+    array = [NSMutableArray new];
+    
     self.picDate.dateValue = currentDate;
     NSString *path = [[NSString alloc] initWithFormat:@"%@%@",[NSSearchPathForDirectoriesInDomains(NSDownloadsDirectory, NSUserDomainMask, YES) lastObject],@"/WallPaper" ];
     self.picPath.stringValue = path;
@@ -110,13 +112,15 @@
 
 -(void)refresh{
     [picTable reloadData];
-    double sum = 0;
+    int count = 0, sum = 0;
     for(picData *p in array){
         sum = sum + [p.progress doubleValue];
+        if ([p.progress intValue] == 100)
+            count++;
     }
     double percent = sum / [array count];
     self.dumpProgress.doubleValue = percent;
-    self.dumpNum.stringValue =[[NSString alloc]initWithFormat:@"%d%%", (int)percent];
+    self.dumpNum.stringValue =[[NSString alloc]initWithFormat:@"%d/%d", count, (int)[array count]];
 }
 
 
@@ -208,9 +212,13 @@ didFinishDownloadingToURL:(NSURL *)location
             
             NSArray *picList = [dic objectForKey:@"data"];
             
-            if ([picList count]){
+            int arrayOriCount = 0;
             
-                array = [NSMutableArray new];
+            if (array!=NULL){
+                arrayOriCount = (int)[array count];
+            }
+            
+            if ([picList count]){
             
                 for(int i = 0; i< [picList count]; i++){
                 
@@ -220,7 +228,7 @@ didFinishDownloadingToURL:(NSURL *)location
                     [data setUrl:url];
                     [data setProgress:[[NSString alloc] initWithFormat:@"%d%%", 0]];
                     [array addObject:data];
-                    [self downLoadPic:[[picList[i] objectForKey:@"image"] objectForKey:@"original"] withIndex:[[NSString alloc] initWithFormat:@"%d", i]];
+                    [self downLoadPic:[[picList[i] objectForKey:@"image"] objectForKey:@"original"] withIndex:[[NSString alloc] initWithFormat:@"%d", i + arrayOriCount]];
                 }
                 [picTable reloadData];
                 //调用主线程刷星进度条
