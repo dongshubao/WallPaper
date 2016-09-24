@@ -218,11 +218,12 @@ didFinishDownloadingToURL:(NSURL *)location
 {
     //建议使用的文件名，一般跟服务器端的文件名一致
     NSString *file = [self.picPath.stringValue stringByAppendingPathComponent:downloadTask.response.suggestedFilename];
-    file = [file stringByReplacingOccurrencesOfString:@".html" withString:@""];
-    // AtPath : 剪切前的文件路径     // ToPath : 剪切后的文件路径
-    [[NSFileManager defaultManager] moveItemAtPath :location.path toPath:file error : nil];
-    //NSLog(@"Done");
-    
+    if (![file hasSuffix:@".html"]){
+        // AtPath : 剪切前的文件路径     // ToPath : 剪切后的文件路径
+        [[NSFileManager defaultManager] moveItemAtPath :location.path toPath:file error : nil];
+        //NSLog(@"Done");
+    }
+
     //同步调用主线程
     dispatch_sync(dispatch_get_main_queue(), ^{
         //[array removeObjectAtIndex:[self getArrayIndexByFile_id:downloadTask.taskDescription]];
