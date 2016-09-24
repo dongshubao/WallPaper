@@ -251,26 +251,6 @@ didFinishDownloadingToURL:(NSURL *)location
 }
 
 
--(NSString *)request_original: (NSString*)httpUrl withHttpArg: (NSString*)HttpArg  {
-    NSString static *result = NULL;
-    NSURLSession * session = [NSURLSession sharedSession];
-    NSString *strUrl = [[NSString alloc] initWithFormat:@"%@?%@", httpUrl, HttpArg];
-    NSURL* url = [NSURL URLWithString:strUrl];
-    NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        if (error) {
-            NSLog(@"Httperror: %@%ld", error.localizedDescription, error.code);
-            result = NULL;
-        } else {
-            NSInteger responseCode = [(NSHTTPURLResponse *)response statusCode];
-            NSLog(@"HttpResponseCode:%ld", responseCode);
-            result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        }
-    }];
-    [task resume];
-    return result;
-}
-
-
 -(void)request: (NSString*)httpUrl withHttpArg: (NSString*)HttpArg  {
     NSString static *result = NULL;
     NSURLSession * session = [NSURLSession sharedSession];
@@ -315,11 +295,12 @@ didFinishDownloadingToURL:(NSURL *)location
                     
                     [array addObject:data];
                 }
-                [picTable reloadData];
 
                 //调用主线程 开始下载 并 刷新进度条
                 dispatch_sync(dispatch_get_main_queue(), ^{
-                    for(int i = 0; i < 10; i++)
+                    [picTable reloadData];
+                    
+                    for(int i = 0; i < 3; i++)
                         [self startDownLoad];
                     
                     self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(refresh)  userInfo:nil repeats:YES];
