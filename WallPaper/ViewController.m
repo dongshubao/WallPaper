@@ -81,7 +81,7 @@
 }
 
 
-- (IBAction)browePath:(id)sender {
+- (IBAction)browsePath:(id)sender {
     
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
 
@@ -132,7 +132,12 @@
     else if ([identifier isEqualToString:@"progress"])
     {
         //NSProgressIndicator *textCell = cell;
-        [cell setTitle:[[NSString alloc] initWithFormat:@"%d%%",[[data progress] intValue]]];
+        double progress = [data progress];
+        if (progress == 0)
+            [cell setTitle:@"等待中"];
+        else{
+            [cell setTitle:[[NSString alloc] initWithFormat:@"%d%%",(int)progress]];
+        }
     }
 }
 
@@ -153,19 +158,20 @@
 
 -(void)refresh{
     [picTable reloadData];
-    int count = 0, sum = 0;
+    int count = 0;
+    double sum = 0;
     for(picData *p in array){
-        sum = sum + [p.progress doubleValue];
-        if ([p.progress intValue] == 100)
+        sum = sum + p.progress;
+        if ((int)p.progress == 100)
             count++;
     }
     double percent = sum / [array count];
     self.dumpProgress.doubleValue = percent;
-    self.dumpNum.stringValue =[[NSString alloc]initWithFormat:@"%d/%d", count, (int)[array count]];
+    self.dumpNum.stringValue =[[NSString alloc]initWithFormat:@"%d", (int)[array count] - count];
 }
 
 
--(void)downLoadPic:(NSString *) urlStr withIndex:(NSString *) downLoadTaskDescription
+-(NSURLSessionDownloadTask *)downLoadPic:(NSString *) urlStr withID:(NSString *) file_id
 {
     //urlStr = [urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSURL * url = [NSURL URLWithString:urlStr];
@@ -177,9 +183,33 @@
     NSURLSession * session_progress = [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:[[NSOperationQueue alloc] init]];
     
     NSURLSessionDownloadTask *downLoadTask = [session_progress downloadTaskWithURL:url];
-    [downLoadTask setTaskDescription:downLoadTaskDescription];
-    //发起并继续任务
-    [downLoadTask resume];
+    //标记下载任务
+    [downLoadTask setTaskDescription:file_id];
+    return downLoadTask;
+    //[downLoadTask resume];
+}
+
+
+-(void)startDownLoad{
+
+    for(picData *p in array){
+        if(p.downLoadTask.state == 1){
+            [p.downLoadTask resume];
+            break;
+        }
+    }
+    
+}
+
+
+-(int)getArrayIndexByFile_id:(NSString *) file_id {
+    picData *data = [picData new];
+    for(int index = 0;index<[array count];index++){
+        data = [array objectAtIndex:index];
+        if (data.file_id==file_id)
+            return index;
+    }
+    return -1;
 }
 
 
@@ -192,6 +222,12 @@ didFinishDownloadingToURL:(NSURL *)location
     // AtPath : 剪切前的文件路径     // ToPath : 剪切后的文件路径
     [[NSFileManager defaultManager] moveItemAtPath :location.path toPath:file error : nil];
     //NSLog(@"Done");
+    
+    //同步调用主线程
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        //[array removeObjectAtIndex:[self getArrayIndexByFile_id:downloadTask.taskDescription]];
+        [self startDownLoad];
+    });
 }
 
 
@@ -202,14 +238,15 @@ didFinishDownloadingToURL:(NSURL *)location
      totalBytesWritten          已经写入的字节数
      totalBytesExpectedToWrite  下载文件总字节数
      */
-    
+
     double progress = (double)totalBytesWritten * 100 / totalBytesExpectedToWrite;
-    //NSLog(@" %@ ,progress = %f",[NSThread currentThread],progress);
-    
-    picData *p = array[[downloadTask.taskDescription intValue]];
-    p.progress = [[NSString alloc]initWithFormat:@"%f%%", progress];
-    //调用主线程刷星进度条
-    dispatch_async(dispatch_get_main_queue(), ^{
+
+    //同步调用主线程
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        picData *p = array[[self getArrayIndexByFile_id:downloadTask.taskDescription]];
+        //NSLog(@"description = %@",downloadTask.taskDescription);
+        p.progress = progress;
+        //NSLog(@"index:%d progress:%f",index,progress);
     });
 }
 
@@ -242,7 +279,7 @@ didFinishDownloadingToURL:(NSURL *)location
     NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (error) {
             NSLog(@"Httperror: %@%ld", error.localizedDescription, error.code);
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_sync(dispatch_get_main_queue(), ^{
                 [self alert:[[NSString alloc] initWithFormat:@"%ld", error.code] withInformative:error.localizedDescription];
             });
         } else {
@@ -266,23 +303,30 @@ didFinishDownloadingToURL:(NSURL *)location
             if ([picList count]){
             
                 for(int i = 0; i< [picList count]; i++){
-                
+                    
+                    NSString *file_id = [picList[i] objectForKey:@"file_id"];
                     NSString *url = [[picList[i] objectForKey:@"image"] objectForKey:@"original"];
-                
+                    
                     picData *data = [picData new];
+                    [data setFile_id:file_id];
                     [data setUrl:url];
-                    [data setProgress:[[NSString alloc] initWithFormat:@"%d%%", 0]];
+                    [data setProgress:0];
+                    [data setDownLoadTask:[self downLoadPic:url withID:file_id]];
+                    
                     [array addObject:data];
-                    [self downLoadPic:[[picList[i] objectForKey:@"image"] objectForKey:@"original"] withIndex:[[NSString alloc] initWithFormat:@"%d", i + arrayOriCount]];
                 }
                 [picTable reloadData];
-                //调用主线程刷星进度条
-                dispatch_async(dispatch_get_main_queue(), ^{
+
+                //调用主线程 开始下载 并 刷新进度条
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    for(int i = 0; i < 10; i++)
+                        [self startDownLoad];
+                    
                     self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(refresh)  userInfo:nil repeats:YES];
                 });
             }
             else{
-                dispatch_async(dispatch_get_main_queue(), ^{
+                dispatch_sync(dispatch_get_main_queue(), ^{
                     [self alert:@"无内容" withInformative:@"请检查网络或者日期！"];
                 });
             }

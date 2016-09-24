@@ -10,7 +10,9 @@
 
 @implementation picData
 
+@synthesize file_id;
 @synthesize url;
 @synthesize progress;
+@synthesize downLoadTask;
 
 @end

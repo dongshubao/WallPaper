@@ -11,12 +11,18 @@
 
 @interface picData : NSObject
 {
+    NSString *file_id;
     NSString *url;
-    NSString *progress;
+    double progress;
+    NSURLSessionDownloadTask *downLoadTask;
 }
+
+@property NSString *file_id;
 
 @property NSString *url;
 
-@property NSString *progress;
+@property double progress;
+
+@property NSURLSessionDownloadTask *downLoadTask;
 
 @end
