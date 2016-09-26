@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface ViewController : NSViewController
+@interface ViewController : NSViewController <NSURLSessionDelegate,NSTableViewDelegate,NSTableViewDataSource>
 
 @property (weak) IBOutlet NSDatePicker *picDate;
 

@@ -88,12 +88,11 @@
     [openDlg setCanChooseDirectories:YES];
     [openDlg setCanChooseFiles:NO];
     [openDlg setCanCreateDirectories:YES];
-    [openDlg setTitle:@"请选择保存位置"];
 
     if ( [openDlg runModal] == NSModalResponseOK )
     {
-        NSArray* files = [openDlg filenames];
-        NSString* fileName = [files objectAtIndex:0];
+        NSString* fileName = openDlg.URL.path;
+        //NSString* fileName = [files objectAtIndex:0];
         self.picPath.stringValue = fileName;
     }
 }
