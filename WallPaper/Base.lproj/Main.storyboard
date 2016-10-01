@@ -237,6 +237,10 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                 </tableColumn>
                                             </tableColumns>
+                                            <connections>
+                                                <outlet property="dataSource" destination="XfG-lQ-9wD" id="IYV-z8-tQ7"/>
+                                                <outlet property="delegate" destination="XfG-lQ-9wD" id="qqH-1d-buY"/>
+                                            </connections>
                                         </tableView>
                                     </subviews>
                                 </clipView>

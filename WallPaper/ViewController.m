@@ -21,8 +21,8 @@
     //NSTimeInterval sec = [date timeIntervalSinceNow];
     //NSDate * currentDate = [[NSDate alloc] initWithTimeIntervalSinceNow:sec];
     
-    [self.picTable setDelegate:self];
-    [self.picTable setDataSource:self];
+    //[self.picTable setDelegate:self];
+    //[self.picTable setDataSource:self];
     
     array = [NSMutableArray new];
     
@@ -211,6 +211,16 @@
     return -1;
 }
 
+-(BOOL)isDownLoading {
+    picData *data = [picData new];
+    for(int index = 0;index<[array count];index++){
+        data = [array objectAtIndex:index];
+        if (data.downLoadTask.state==0)
+            return TRUE;
+    }
+    return FALSE;
+}
+
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
 didFinishDownloadingToURL:(NSURL *)location
@@ -287,23 +297,28 @@ didFinishDownloadingToURL:(NSURL *)location
                     NSString *file_id = [picList[i] objectForKey:@"file_id"];
                     NSString *url = [[picList[i] objectForKey:@"image"] objectForKey:@"original"];
                     
-                    picData *data = [picData new];
-                    [data setFile_id:file_id];
-                    [data setUrl:url];
-                    [data setProgress:0];
-                    [data setDownLoadTask:[self downLoadPic:url withID:file_id]];
-                    
-                    [array addObject:data];
+                    //当下载列表中不存在将要下载的文件时，增加下载任务
+                    if ([self getArrayIndexByFile_id:file_id] == -1){
+                        picData *data = [picData new];
+                        [data setFile_id:file_id];
+                        [data setUrl:url];
+                        [data setProgress:0];
+                        [data setDownLoadTask:[self downLoadPic:url withID:file_id]];
+                        
+                        [array addObject:data];
+                    };
                 }
 
                 //调用主线程 开始下载 并 刷新进度条
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     [picTable reloadData];
                     
-                    for(int i = 0; i < 3; i++)
-                        [self startDownLoad];
-                    
-                    self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(refresh)  userInfo:nil repeats:YES];
+                    //当不存在正在下载的任务时，添加三线程下载
+                    if (![self isDownLoading]){
+                        for(int i = 0; i < 3; i++)
+                            [self startDownLoad];
+                        self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(refresh)  userInfo:nil repeats:YES];
+                    }
                 });
             }
             else{
